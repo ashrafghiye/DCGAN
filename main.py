@@ -209,11 +209,8 @@ def generate(args):
     use_cuda = torch.cuda.is_available()
     device = torch.device('cuda') if use_cuda else torch.device('cpu')
 
-    ######################
-    # START CODING HERE ##
-    ######################
     # Step 1 - Reload the generator
-    generator = None
+    generator = torch.load(modelpath)
 
     # Put the model in evaluation mode (due to BN and Dropout)
     generator.eval()
@@ -224,17 +221,14 @@ def generate(args):
 
     # Step 2 - Generate a noise vector, normaly distributed
     #          of shape (sample_nrows * sample_ncol, generator.latent_size)
-    z = None
+    z = torch.normal(0, 1, (sample_nrows*sample_ncols, args.latent_size))
 
     # Step 3 - Forward pass through the generator
     #          The output is (B, 1, 28, 28)
-    fake_images = None
+    fake_images = generator(z)
 
     # Denormalize the result
     fake_images = fake_images * data._MNIST_STD + data._MNIST_MEAN
-    ####################
-    # END CODING HERE ##
-    ####################
 
     grid = torchvision.utils.make_grid(fake_images,
                                        nrow=sample_ncols,
